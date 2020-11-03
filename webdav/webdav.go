@@ -539,7 +539,7 @@ func (h *Handler) handlePropfind(w http.ResponseWriter, r *http.Request) (status
 		}
 		var pstats []Propstat
 		if pf.Propname != nil {
-			pnames, err := propnames(ctx, h.FileSystem, h.LockSystem, reqPath)
+			pnames, err := propnames(ctx, h.FileSystem, h.LockSystem, reqPath, info)
 			if err != nil {
 				return err
 			}
@@ -549,9 +549,9 @@ func (h *Handler) handlePropfind(w http.ResponseWriter, r *http.Request) (status
 			}
 			pstats = append(pstats, pstat)
 		} else if pf.Allprop != nil {
-			pstats, err = allprop(ctx, h.FileSystem, h.LockSystem, reqPath, pf.Prop)
+			pstats, err = allprop(ctx, h.FileSystem, h.LockSystem, reqPath, pf.Prop, info)
 		} else {
-			pstats, err = props(ctx, h.FileSystem, h.LockSystem, reqPath, pf.Prop)
+			pstats, err = props(ctx, h.FileSystem, h.LockSystem, reqPath, pf.Prop, info)
 		}
 		if err != nil {
 			return err

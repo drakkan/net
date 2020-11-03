@@ -166,15 +166,17 @@ var liveProps = map[xml.Name]struct {
 //
 // Each Propstat has a unique status and each property name will only be part
 // of one Propstat element.
-func props(ctx context.Context, fs FileSystem, ls LockSystem, name string, pnames []xml.Name) ([]Propstat, error) {
+func props(ctx context.Context, fs FileSystem, ls LockSystem, name string, pnames []xml.Name, fi os.FileInfo) ([]Propstat, error) {
 	f, err := fs.OpenFile(ctx, name, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	fi, err := f.Stat()
-	if err != nil {
-		return nil, err
+	if fi == nil {
+		fi, err = f.Stat()
+		if err != nil {
+			return nil, err
+		}
 	}
 	isDir := fi.IsDir()
 
@@ -214,15 +216,17 @@ func props(ctx context.Context, fs FileSystem, ls LockSystem, name string, pname
 }
 
 // Propnames returns the property names defined for resource name.
-func propnames(ctx context.Context, fs FileSystem, ls LockSystem, name string) ([]xml.Name, error) {
+func propnames(ctx context.Context, fs FileSystem, ls LockSystem, name string, fi os.FileInfo) ([]xml.Name, error) {
 	f, err := fs.OpenFile(ctx, name, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	fi, err := f.Stat()
-	if err != nil {
-		return nil, err
+	if fi == nil {
+		fi, err = f.Stat()
+		if err != nil {
+			return nil, err
+		}
 	}
 	isDir := fi.IsDir()
 
@@ -254,8 +258,8 @@ func propnames(ctx context.Context, fs FileSystem, ls LockSystem, name string) (
 // returned if they are named in 'include'.
 //
 // See http://www.webdav.org/specs/rfc4918.html#METHOD_PROPFIND
-func allprop(ctx context.Context, fs FileSystem, ls LockSystem, name string, include []xml.Name) ([]Propstat, error) {
-	pnames, err := propnames(ctx, fs, ls, name)
+func allprop(ctx context.Context, fs FileSystem, ls LockSystem, name string, include []xml.Name, fi os.FileInfo) ([]Propstat, error) {
+	pnames, err := propnames(ctx, fs, ls, name, fi)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +273,7 @@ func allprop(ctx context.Context, fs FileSystem, ls LockSystem, name string, inc
 			pnames = append(pnames, pn)
 		}
 	}
-	return props(ctx, fs, ls, name, pnames)
+	return props(ctx, fs, ls, name, pnames, fi)
 }
 
 // Patch patches the properties of resource name. The return values are
