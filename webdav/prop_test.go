@@ -522,7 +522,7 @@ func TestMemPS(t *testing.T) {
 			var propstats []Propstat
 			switch op.op {
 			case "propname":
-				pnames, err := propnames(ctx, fs, ls, op.name)
+				pnames, err := propnames(ctx, fs, ls, op.name, nil)
 				if err != nil {
 					t.Errorf("%s: got error %v, want nil", desc, err)
 					continue
@@ -534,9 +534,9 @@ func TestMemPS(t *testing.T) {
 				}
 				continue
 			case "allprop":
-				propstats, err = allprop(ctx, fs, ls, op.name, op.pnames)
+				propstats, err = allprop(ctx, fs, ls, op.name, op.pnames, nil)
 			case "propfind":
-				propstats, err = props(ctx, fs, ls, op.name, op.pnames)
+				propstats, err = props(ctx, fs, ls, op.name, op.pnames, nil)
 			case "proppatch":
 				propstats, err = patch(ctx, fs, ls, op.name, op.patches)
 			default:
