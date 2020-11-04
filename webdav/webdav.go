@@ -200,11 +200,17 @@ func (h *Handler) handleGetHeadPost(w http.ResponseWriter, r *http.Request) (sta
 	ctx := r.Context()
 	f, err := h.FileSystem.OpenFile(ctx, reqPath, os.O_RDONLY, 0)
 	if err != nil {
+		if os.IsPermission(err) {
+			return http.StatusForbidden, err
+		}
 		return http.StatusNotFound, err
 	}
 	defer f.Close()
 	fi, err := f.Stat()
 	if err != nil {
+		if os.IsPermission(err) {
+			return http.StatusForbidden, err
+		}
 		return http.StatusNotFound, err
 	}
 	if fi.IsDir() {
@@ -241,10 +247,15 @@ func (h *Handler) handleDelete(w http.ResponseWriter, r *http.Request) (status i
 	if _, err := h.FileSystem.Stat(ctx, reqPath); err != nil {
 		if os.IsNotExist(err) {
 			return http.StatusNotFound, err
+		} else if os.IsPermission(err) {
+			return http.StatusForbidden, err
 		}
 		return http.StatusMethodNotAllowed, err
 	}
 	if err := h.FileSystem.RemoveAll(ctx, reqPath); err != nil {
+		if os.IsPermission(err) {
+			return http.StatusForbidden, err
+		}
 		return http.StatusMethodNotAllowed, err
 	}
 	return http.StatusNoContent, nil
@@ -266,6 +277,9 @@ func (h *Handler) handlePut(w http.ResponseWriter, r *http.Request) (status int,
 
 	f, err := h.FileSystem.OpenFile(ctx, reqPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
+		if os.IsPermission(err) {
+			return http.StatusForbidden, err
+		}
 		return http.StatusNotFound, err
 	}
 	_, copyErr := io.Copy(f, r.Body)
@@ -516,6 +530,8 @@ func (h *Handler) handlePropfind(w http.ResponseWriter, r *http.Request) (status
 	if err != nil {
 		if os.IsNotExist(err) {
 			return http.StatusNotFound, err
+		} else if os.IsPermission(err) {
+			return http.StatusForbidden, err
 		}
 		return http.StatusMethodNotAllowed, err
 	}
@@ -590,6 +606,8 @@ func (h *Handler) handleProppatch(w http.ResponseWriter, r *http.Request) (statu
 	if _, err := h.FileSystem.Stat(ctx, reqPath); err != nil {
 		if os.IsNotExist(err) {
 			return http.StatusNotFound, err
+		} else if os.IsPermission(err) {
+			return http.StatusForbidden, err
 		}
 		return http.StatusMethodNotAllowed, err
 	}
