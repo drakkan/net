@@ -671,6 +671,8 @@ func copyFiles(ctx context.Context, fs FileSystem, src, dst string, overwrite bo
 	if err != nil {
 		if os.IsNotExist(err) {
 			return http.StatusNotFound, err
+		} else if os.IsPermission(err) {
+			return http.StatusForbidden, err
 		}
 		return http.StatusInternalServerError, err
 	}
@@ -679,6 +681,8 @@ func copyFiles(ctx context.Context, fs FileSystem, src, dst string, overwrite bo
 	if err != nil {
 		if os.IsNotExist(err) {
 			return http.StatusNotFound, err
+		} else if os.IsPermission(err) {
+			return http.StatusForbidden, err
 		}
 		return http.StatusInternalServerError, err
 	}
