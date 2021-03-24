@@ -664,6 +664,10 @@ func handlePropfindError(err error, info os.FileInfo) error {
 		return skipResp
 	}
 
+	if errors.Is(err, os.ErrNotExist) {
+		return skipResp
+	}
+
 	if _, ok := err.(*os.PathError); ok {
 		// If the file is just bad, it couldn't be a proper WebDAV resource. Skip it.
 		return skipResp
